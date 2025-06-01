@@ -1,95 +1,121 @@
-// ========= 1. 必须设置 Cesium 静态路径 =========
+// ========= 1. 设置Cesium基础路径 =========
 window.CESIUM_BASE_URL = 'Cesium/Build/Cesium/';
 
-// ========= 2. 设置 Cesium ion Token（替换为你自己的） =========
-Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkOTcwNGJiMi1jZGMxLTRmYWQtYWVkYy03NTExNjgwMmZmMDIiLCJpZCI6MzA2MjgwLCJpYXQiOjE3NDgyNDEwNTZ9.uWzKJd7hvZgAlifHHHNpCtF02jU0ee3OULbbVxNyLpE';  // 请替换！
+// ========= 2. 设置Cesium ion Token（测试用，建议替换） =========
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkOTcwNGJiMi1jZGMxLTRmYWQtYWVkYy03NTExNjgwMmZmMDIiLCJpZCI6MzA2MjgwLCJpYXQiOjE3NDgyNDEwNTZ9.uWzKJd7hvZgAlifHHHNpCtF02jU0ee3OULbbVxNyLpE';
 
 // ========= 3. 全局变量 =========
 let viewer;
 let trafficLayer = null;
 let tileset = null;
+let isNightMode = false;
 
-// ========= 4. 初始化 Viewer =========
-document.addEventListener('DOMContentLoaded', async function () {
+// ========= 4. 初始化Viewer =========
+document.addEventListener('DOMContentLoaded', async function() {
   try {
+    // 初始化Cesium Viewer
     viewer = new Cesium.Viewer('cesiumContainer', {
       terrainProvider: await Cesium.createWorldTerrainAsync(),
       animation: false,
       timeline: false,
-      sceneModePicker: false
+      sceneModePicker: false,
+      baseLayerPicker: false,
+      skyBox: false // 初始禁用天空盒
     });
 
-    // 设置黑色背景以适配夜景
+    // 设置初始背景色
     viewer.scene.backgroundColor = Cesium.Color.BLACK;
 
-    // 加载东京交通数据（GeoJSON）
+    // 加载交通数据
     trafficLayer = await Cesium.GeoJsonDataSource.load('data/tokyo_motorway.geojson', {
-      stroke: Cesium.Color.YELLOW,
-      strokeWidth: 2,
+      stroke: Cesium.Color.YELLOW.withAlpha(0.8),
+      strokeWidth: 3,
       clampToGround: true
     });
     viewer.dataSources.add(trafficLayer);
 
-    // 加载东京 3D 建筑（3D Tiles）
-    const assetId = 2602291; // 替换为你的 Asset ID（Japan 3D Buildings）
-    tileset = await Cesium.Cesium3DTileset.fromIonAssetId(assetId);
+    // 加载3D建筑（使用东京示例数据）
+    tileset = await Cesium.Cesium3DTileset.fromIonAssetId(96188); // 替换为你的assetId
     viewer.scene.primitives.add(tileset);
 
-    console.log('Cesium 初始化完成！');
+    // 初始视角
+    flyToTokyo();
 
+    console.log('Cesium初始化完成！');
   } catch (error) {
     console.error('初始化失败:', error);
-    alert(`地图加载失败: ${error.message}`);
+    alert('地图加载失败，请检查控制台错误');
   }
 });
 
-// ========= 5. 控制按钮功能 =========
+// ========= 5. 功能函数 =========
 
-window.flyToTokyo = function () {
+// 飞到东京
+window.flyToTokyo = function() {
   if (!viewer) return alert('地图未加载完成');
   viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(139.6917, 35.6895, 30000),
+    destination: Cesium.Cartesian3.fromDegrees(139.6917, 35.6895, 25000),
     orientation: {
       heading: Cesium.Math.toRadians(0),
-      pitch: Cesium.Math.toRadians(-45),
+      pitch: Cesium.Math.toRadians(-30),
       roll: 0
-    }
+    },
+    duration: 2
   });
 };
 
-window.toggleTraffic = function () {
-  if (trafficLayer) trafficLayer.show = !trafficLayer.show;
+// 切换交通显示
+window.toggleTraffic = function() {
+  if (trafficLayer) {
+    trafficLayer.show = !trafficLayer.show;
+    alert('交通图层已' + (trafficLayer.show ? '显示' : '隐藏'));
+  }
 };
 
-window.switchToNight = function () {
-  if (!viewer) return;
+// 夜景模式
+window.switchToNight = function() {
+  if (!viewer || isNightMode) return;
 
-  // 启用地球光照
+  // 光照设置
   viewer.scene.globe.enableLighting = true;
-
-  // 关闭天空盒
-  viewer.scene.skyBox.show = false;
-
-  // 添加弱光源模拟夜景
   viewer.scene.light = new Cesium.DirectionalLight({
-    direction: new Cesium.Cartesian3(-0.5, -1.0, -0.3),
-    intensity: 0.6
+    direction: Cesium.Cartesian3.fromDegrees(-135, 30),
+    intensity: 0.5,
+    color: Cesium.Color.fromCssColorString('#3a3a5a')
   });
 
-  // 大气层调暗
-  viewer.scene.skyAtmosphere.brightnessShift = -0.5;
+  // 环境设置
+  viewer.scene.skyAtmosphere.brightnessShift = -0.7;
+  viewer.scene.skyAtmosphere.hueShift = 0.5;
+  viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0a0a1a');
 
-  // 模拟夜间灯光（仅适用于 3D Tiles）
+  // 3D建筑设置
   if (tileset) {
-    tileset.luminanceAtNight = 0.4;
-    tileset.colorBlendMode = Cesium.Cesium3DTileColorBlendMode.MIX;
-    tileset.style = new Cesium.Cesium3DTileStyle({
-      color: "color('white', 0.6)"
-    });
+    tileset.luminanceAtNight = 0.3;
   }
 
-  // 添加月亮（可选）
-  viewer.scene.moon = new Cesium.Moon({ show: true });
+  isNightMode = true;
+  console.log('夜景模式已激活');
+};
 
-  console.log("夜景模式已启用");
+// 白天模式
+window.resetDayMode = function() {
+  if (!viewer || !isNightMode) return;
+
+  // 恢复日光
+  viewer.scene.globe.enableLighting = false;
+  viewer.scene.light = new Cesium.SunLight();
+
+  // 恢复环境
+  viewer.scene.skyAtmosphere.brightnessShift = 0;
+  viewer.scene.skyAtmosphere.hueShift = 0;
+  viewer.scene.backgroundColor = Cesium.Color.BLACK;
+
+  // 恢复3D建筑
+  if (tileset) {
+    tileset.luminanceAtNight = 0;
+  }
+
+  isNightMode = false;
+  console.log('已恢复白天模式');
 };
