@@ -6,6 +6,7 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 
 // ========= 3. 全局变量 =========
 let viewer;
+let populationLayer = null;
 let trafficLayer = null;
 let tileset = null;
 let isNightMode = false;
@@ -54,6 +55,41 @@ document.addEventListener('DOMContentLoaded', async function() {
     alert('地图加载失败: ' + error.message);
   }
 });
+async function loadPopulationLayer() {
+  if (populationLayer) return;
+
+  populationLayer = await Cesium.GeoJsonDataSource.load('data/tokyo_population_density.geojson', {
+    clampToGround: true
+  });
+
+  populationLayer.entities.values.forEach(entity => {
+    const density = entity.properties?.population_density?.getValue();
+
+    if (density !== undefined) {
+      let color = Cesium.Color.PURPLE.withAlpha(0.1); // 默认最低密度颜色：紫
+
+      if (density > 1000)  color = Cesium.Color.CYAN.withAlpha(0.15);   // 青
+      if (density > 3000)  color = Cesium.Color.BLUE.withAlpha(0.18);   // 蓝
+      if (density > 5000)  color = Cesium.Color.GREEN.withAlpha(0.2);   // 绿
+      if (density > 8000)  color = Cesium.Color.YELLOW.withAlpha(0.25); // 黄
+      if (density > 12000) color = Cesium.Color.ORANGE.withAlpha(0.3);  // 橙
+      if (density > 20000) color = Cesium.Color.RED.withAlpha(0.35);    // 红
+
+      entity.polygon.material = color;
+      entity.polygon.outline = false;
+
+      entity.description = `
+        <div class="info-content">
+          <h3>区域人口密度</h3>
+          <p>👥 ${density.toLocaleString()} 人/km²</p>
+        </div>
+      `;
+    }
+  });
+
+  viewer.dataSources.add(populationLayer);
+}
+
 
 // ========= 5. 添加东京标记 =========
 function addTokyoMarkers() {
@@ -196,6 +232,14 @@ window.toggleTraffic = function() {
   if (trafficLayer) {
     trafficLayer.show = !trafficLayer.show;
     console.log('交通图层已' + (trafficLayer.show ? '显示' : '隐藏'));
+  }
+};
+window.togglePopulation = function () {
+  if (!populationLayer) {
+    loadPopulationLayer();
+  } else {
+    populationLayer.show = !populationLayer.show;
+    console.log('人口密度图层已' + (populationLayer.show ? '显示' : '隐藏'));
   }
 };
 
