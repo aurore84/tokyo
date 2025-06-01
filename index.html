@@ -2,7 +2,8 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>东京交通可视化-夜景优化版</title>
+  <title>东京交通可视化</title>
+  <!-- 修正 Cesium 路径 -->
   <script src="Cesium/Build/Cesium/Cesium.js"></script>
   <link href="Cesium/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   <style>
@@ -12,32 +13,34 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
+      background-color: black;
     }
+
     #toolbar {
       position: absolute;
       top: 10px;
       left: 10px;
-      background: rgba(30,30,40,0.8); /* 夜间适配 */
+      background: rgba(0, 0, 0, 0.6);
       padding: 10px;
       border-radius: 6px;
       z-index: 1000;
+      color: #fff;
     }
+
     button {
       display: block;
-      margin: 5px 0;
-      width: 120px;
-      background: rgba(50,50,70,0.9); /* 深色按钮 */
-      color: #e0e0ff; /* 浅色文字 */
-      border: 1px solid #444466;
+      margin: 6px 0;
+      width: 150px;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      background-color: #222;
+      color: white;
+      cursor: pointer;
     }
-    
-    /* 夜间模式专用样式 */
-    .night-mode {
-      background-color: rgba(10,10,20,0.95) !important;
-    }
-    .night-mode button {
-      background: rgba(30,30,60,0.9);
-      color: #aab;
+
+    button:hover {
+      background-color: #444;
     }
   </style>
 </head>
@@ -47,9 +50,8 @@
     <button onclick="flyToTokyo()">飞到东京</button>
     <button onclick="toggleTraffic()">显示/隐藏交通</button>
     <button onclick="switchToNight()">夜景模式</button>
-    <button onclick="resetDayMode()">恢复白天</button> <!-- 新增按钮 -->
   </div>
-  
+
   <script src="main.js"></script>
 </body>
 </html>
