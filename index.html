@@ -1,480 +1,55 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-    <title>东京三维城市沙盘</title>
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.106/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.106/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        html, body, #cesiumContainer {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        body {
-            position: relative;
-        }
-        
-        .cesium-viewer-toolbar {
-            top: 60px !important;
-        }
-        
-        /* 侧边控制面板 */
-        .sidebar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 300px;
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-            overflow-y: auto;
-        }
-        
-        .sidebar.open {
-            transform: translateX(0);
-        }
-        
-        .sidebar-toggle {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 40px;
-            height: 40px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            z-index: 1001;
-            transition: left 0.3s ease-in-out;
-        }
-        
-        .sidebar-toggle.open {
-            left: 320px;
-        }
-        
-        .sidebar-content {
-            padding: 20px;
-        }
-        
-        .sidebar h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-        
-        .layer-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 8px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-        
-        .layer-item:hover {
-            background-color: #e8e8e8;
-        }
-        
-        .layer-item input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        
-        .layer-item label {
-            flex-grow: 1;
-            cursor: pointer;
-        }
-        
-        .theme-selector {
-            margin-bottom: 20px;
-        }
-        
-        .theme-btn {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 8px;
-            border: none;
-            border-radius: 4px;
-            background-color: #4a6fa5;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            font-weight: 500;
-        }
-        
-        .theme-btn:hover {
-            background-color: #3a5a82;
-        }
-        
-        .theme-btn.active {
-            background-color: #166088;
-        }
-        
-        /* 信息面板 */
-        .info-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            max-width: 300px;
-            z-index: 1000;
-        }
-        
-        .info-title {
-            font-size: 1.1em;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        
-        .info-content {
-            font-size: 0.9em;
-            color: #666;
-        }
-        
-        /* 统计图表 */
-        .chart-container {
-            margin-top: 20px;
-            background-color: white;
-            border-radius: 6px;
-            padding: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-        }
-        
-        .chart-title {
-            font-size: 1em;
-            font-weight: 500;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        
-        /* 动画过渡 */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>东京交通可视化-夜景优化版</title>
+  <script src="Cesium/Build/Cesium/Cesium.js"></script>
+  <link href="Cesium/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body, #cesiumContainer {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    #toolbar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(30,30,40,0.8); /* 夜间适配 */
+      padding: 10px;
+      border-radius: 6px;
+      z-index: 1000;
+    }
+    button {
+      display: block;
+      margin: 5px 0;
+      width: 120px;
+      background: rgba(50,50,70,0.9); /* 深色按钮 */
+      color: #e0e0ff; /* 浅色文字 */
+      border: 1px solid #444466;
+    }
+    
+    /* 夜间模式专用样式 */
+    .night-mode {
+      background-color: rgba(10,10,20,0.95) !important;
+    }
+    .night-mode button {
+      background: rgba(30,30,60,0.9);
+      color: #aab;
+    }
+  </style>
 </head>
 <body>
-    <div id="cesiumContainer"></div>
-    
-    <!-- 侧边控制面板 -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-content">
-            <h3>东京城市沙盘</h3>
-            
-            <div class="theme-selector">
-                <h4>主题场景</h4>
-                <button class="theme-btn active" data-theme="normal">标准视图</button>
-                <button class="theme-btn" data-theme="historical">历史演变</button>
-                <button class="theme-btn" data-theme="night">夜景照明</button>
-                <button class="theme-btn" data-theme="future">未来规划</button>
-            </div>
-            
-            <div class="layers">
-                <h4>数据图层</h4>
-                <div class="layer-item">
-                    <input type="checkbox" id="terrain" checked>
-                    <label for="terrain">地形数据</label>
-                </div>
-                <div class="layer-item">
-                    <input type="checkbox" id="buildings" checked>
-                    <label for="buildings">建筑模型</label>
-                </div>
-                <div class="layer-item">
-                    <input type="checkbox" id="traffic" checked>
-                    <label for="traffic">交通流量</label>
-                </div>
-                <div class="layer-item">
-                    <input type="checkbox" id="population" checked>
-                    <label for="population">人口密度</label>
-                </div>
-                <div class="layer-item">
-                    <input type="checkbox" id="planning" checked>
-                    <label for="planning">规划方案</label>
-                </div>
-            </div>
-            
-            <div class="chart-container">
-                <div class="chart-title">东京人口趋势</div>
-                <canvas id="populationChart" width="260" height="150"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 侧边栏切换按钮 -->
-    <div class="sidebar-toggle" id="sidebarToggle">
-        <i class="fa fa-bars"></i>
-    </div>
-    
-    <!-- 信息面板 -->
-    <div class="info-panel fade-in">
-        <div class="info-title">东京城市沙盘</div>
-        <div class="info-content">
-            探索东京的三维地形、建筑和城市数据。使用鼠标或触控屏进行交互，
-            点击侧边栏可切换不同主题场景和数据图层。
-        </div>
-    </div>
-
-    <script>
-        // 注册Cesium Ion访问令牌
-        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjZGYzNjY4Yy0xZTYwLTQ4MTctYjI5Yy0wMTQwODQzOTZmNTYiLCJpZCI6MTAzNjA5LCJpYXQiOjE2ODc1NzI4ODd9.-YfR1QwSdC4Z1i2iK9pK9p4Z9yf8W0l9yK0fK7d8a6s';
-        
-        // 初始化Cesium Viewer
-        const viewer = new Cesium.Viewer('cesiumContainer', {
-            terrainProvider: Cesium.createWorldTerrain(),
-            baseLayerPicker: false,
-            geocoder: false,
-            homeButton: false,
-            infoBox: false,
-            sceneModePicker: false,
-            navigationHelpButton: false,
-            timeline: false,
-            animation: false,
-            fullscreenButton: false,
-            shouldAnimate: true
-        });
-        
-        // 隐藏Cesium logo
-        viewer._cesiumWidget._creditContainer.style.display = 'none';
-        
-        // 设置东京初始视角
-        viewer.camera.setView({
-            destination: Cesium.Cartesian3.fromDegrees(139.7671, 35.6813, 5000),
-            orientation: {
-                heading: Cesium.Math.toRadians(0.0),
-                pitch: Cesium.Math.toRadians(-15.0),
-                roll: 0.0
-            }
-        });
-        
-        // 加载东京建筑数据
-        const buildingsLayer = viewer.scene.primitives.add(
-            Cesium.createOsmBuildings()
-        );
-        
-        // 加载东京地形数据
-        const terrainLayer = viewer.terrainProvider;
-        
-        // 模拟加载交通流量数据
-        const trafficLayer = viewer.imageryLayers.addImageryProvider(
-            new Cesium.TileMapServiceImageryProvider({
-                url: Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII')
-            })
-        );
-        trafficLayer.alpha = 0.5;
-        trafficLayer.show = true;
-        
-        // 模拟加载人口密度数据
-        const populationLayer = viewer.imageryLayers.addImageryProvider(
-            new Cesium.TileMapServiceImageryProvider({
-                url: Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII')
-            })
-        );
-        populationLayer.alpha = 0.5;
-        populationLayer.show = true;
-        
-        // 模拟加载规划方案数据
-        const planningLayer = viewer.imageryLayers.addImageryProvider(
-            new Cesium.TileMapServiceImageryProvider({
-                url: Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII')
-            })
-        );
-        planningLayer.alpha = 0.5;
-        planningLayer.show = true;
-        
-        // 侧边栏切换
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            sidebarToggle.classList.toggle('open');
-        });
-        
-        // 图层控制
-        document.getElementById('terrain').addEventListener('change', function() {
-            viewer.terrainProvider = this.checked ? terrainLayer : new Cesium.EllipsoidTerrainProvider();
-        });
-        
-        document.getElementById('buildings').addEventListener('change', function() {
-            buildingsLayer.show = this.checked;
-        });
-        
-        document.getElementById('traffic').addEventListener('change', function() {
-            trafficLayer.show = this.checked;
-        });
-        
-        document.getElementById('population').addEventListener('change', function() {
-            populationLayer.show = this.checked;
-        });
-        
-        document.getElementById('planning').addEventListener('change', function() {
-            planningLayer.show = this.checked;
-        });
-        
-        // 主题场景切换
-        const themeButtons = document.querySelectorAll('.theme-btn');
-        themeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // 移除所有按钮的active类
-                themeButtons.forEach(btn => btn.classList.remove('active'));
-                // 添加当前按钮的active类
-                this.classList.add('active');
-                
-                const theme = this.getAttribute('data-theme');
-                applyTheme(theme);
-            });
-        });
-        
-        // 应用主题场景
-        function applyTheme(theme) {
-            switch(theme) {
-                case 'normal':
-                    // 标准视图
-                    viewer.scene.globe.baseColor = Cesium.Color.WHITE;
-                    viewer.scene.light = new Cesium.SunLight();
-                    trafficLayer.alpha = 0.5;
-                    populationLayer.alpha = 0.5;
-                    planningLayer.alpha = 0.5;
-                    break;
-                    
-                case 'historical':
-                    // 历史演变
-                    viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#E8E0D1');
-                    trafficLayer.alpha = 0.3;
-                    populationLayer.alpha = 0.7;
-                    planningLayer.alpha = 0.2;
-                    // 添加历史时间轴控制逻辑
-                    break;
-                    
-                case 'night':
-                    // 夜景照明
-                    viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0A192F');
-                    viewer.scene.light = new Cesium.DirectionalLight({
-                        direction: new Cesium.Cartesian3(0.5, 0.5, 1)
-                    });
-                    trafficLayer.alpha = 0.8;
-                    populationLayer.alpha = 0.4;
-                    planningLayer.alpha = 0.6;
-                    // 添加建筑物灯光效果
-                    break;
-                    
-                case 'future':
-                    // 未来规划
-                    viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#D6E6F2');
-                    trafficLayer.alpha = 0.4;
-                    populationLayer.alpha = 0.3;
-                    planningLayer.alpha = 0.8;
-                    // 添加未来建筑高亮效果
-                    break;
-            }
-        }
-        
-        // 创建人口趋势图表
-        const ctx = document.getElementById('populationChart').getContext('2d');
-        const populationChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'],
-                datasets: [{
-                    label: '东京人口(百万)',
-                    data: [13.51, 13.59, 13.63, 13.66, 13.96, 14.04, 14.05, 14.09, 14.12, 14.15],
-                    borderColor: '#4a6fa5',
-                    backgroundColor: 'rgba(74, 111, 165, 0.1)',
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        grid: {
-                            display: true,
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-        
-        // 添加交互功能 - 点击显示位置信息
-        const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
-        handler.setInputAction(function(movement) {
-            const cartesian = viewer.camera.pickEllipsoid(movement.position, viewer.scene.globe.ellipsoid);
-            if (cartesian) {
-                const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-                const longitude = Cesium.Math.toDegrees(cartographic.longitude).toFixed(4);
-                const latitude = Cesium.Math.toDegrees(cartographic.latitude).toFixed(4);
-                const height = cartographic.height.toFixed(0);
-                
-                // 更新信息面板
-                const infoPanel = document.querySelector('.info-panel');
-                infoPanel.querySelector('.info-title').textContent = '位置信息';
-                infoPanel.querySelector('.info-content').textContent = 
-                    `经度: ${longitude}°\n纬度: ${latitude}°\n高度: ${height}米`;
-            }
-        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-        
-        // 添加鼠标移动时的提示
-        handler.setInputAction(function(movement) {
-            viewer.enableCursorStyle = false;
-            viewer._element.style.cursor = 'default';
-            const ray = viewer.camera.getPickRay(movement.endPosition);
-            const scene = viewer.scene;
-            const cartesian = scene.globe.pick(ray, scene);
-            if (cartesian) {
-                viewer._element.style.cursor = 'pointer';
-            }
-        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-        
-        // 初始化动画效果
-        setTimeout(() => {
-            document.querySelector('.info-panel').classList.add('fade-in');
-        }, 1000);
-    </script>
+  <div id="cesiumContainer"></div>
+  <div id="toolbar">
+    <button onclick="flyToTokyo()">飞到东京</button>
+    <button onclick="toggleTraffic()">显示/隐藏交通</button>
+    <button onclick="switchToNight()">夜景模式</button>
+    <button onclick="resetDayMode()">恢复白天</button> <!-- 新增按钮 -->
+  </div>
+  
+  <script src="main.js"></script>
 </body>
 </html>
-    
