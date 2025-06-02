@@ -6,6 +6,8 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 
 // ========= 3. 全局变量 =========
 let viewer;
+let tokyoBoundaryLayer = null;
+let subwayLayer = null;
 let populationLayer = null;
 let trafficLayer = null;
 let tileset = null;
@@ -55,6 +57,62 @@ document.addEventListener('DOMContentLoaded', async function() {
     alert('地图加载失败: ' + error.message);
   }
 });
+
+async function loadTokyoBoundary() {
+  if (tokyoBoundaryLayer) return;
+
+  tokyoBoundaryLayer = await Cesium.GeoJsonDataSource.load('data/tokyo_boundary.geojson', {
+    fill: Cesium.Color.YELLOW.withAlpha(0.15), // 柔和黄色半透明填充
+    stroke: Cesium.Color.YELLOW.withAlpha(0.9), // 明亮边界线
+    strokeWidth: 3,
+    clampToGround: true
+  });
+
+  viewer.dataSources.add(tokyoBoundaryLayer);
+  viewer.flyTo(tokyoBoundaryLayer); // 可选，自动飞行
+}
+
+async function loadSubwayLayer() {
+  if (subwayLayer) return;
+
+  subwayLayer = await Cesium.GeoJsonDataSource.load('data/tokyo_subway.geojson', {
+    clampToGround: true
+  });
+
+  const colorMap = {
+    "都営地下鉄浅草線": Cesium.Color.fromCssColorString("#FF0000"),  // 红
+    "都営地下鉄三田線": Cesium.Color.fromCssColorString("#FF7F00"),  // 橙
+    "都営地下鉄大江戸線": Cesium.Color.fromCssColorString("#FFFF00"),  // 黄
+    "東京メトロ銀座線": Cesium.Color.fromCssColorString("#00FF00"),  // 绿
+    "東京メトロ日比谷線": Cesium.Color.fromCssColorString("#0000FF"),  // 蓝
+    "東京メトロ千代田線": Cesium.Color.fromCssColorString("#4B0082"),  // 靛
+    "東京メトロ有楽町線": Cesium.Color.fromCssColorString("#8B00FF"),  // 紫
+    "東京メトロ南北線": Cesium.Color.fromCssColorString("#FF1493"),  // 粉
+    "東京メトロ丸ノ内線": Cesium.Color.fromCssColorString("#00FFFF")   // 青绿
+  };
+
+  subwayLayer.entities.values.forEach(entity => {
+
+    const lineName = entity.properties?.name?.getValue?.() || "Tokyo Subway";
+    const color = colorMap[lineName] || Cesium.Color.CYAN;
+  //  console.log('属性字段:', entity.properties.getPropertyNames());
+    entity.polyline.material = color.withAlpha(0.8);
+    entity.polyline.width = 4;
+
+    // 设置描述
+    entity.description = `
+      <div class="info-content">
+        <h3>🚇 ${lineName}</h3>
+        <p>东京地铁线路</p>
+      </div>
+    `;
+  });
+
+  viewer.dataSources.add(subwayLayer);
+  console.log('地铁线路图层已加载并分类着色');
+}
+
+
 async function loadPopulationLayer() {
   if (populationLayer) return;
 
@@ -89,6 +147,12 @@ async function loadPopulationLayer() {
 
   viewer.dataSources.add(populationLayer);
 }
+window.toggleLegend = function () {
+  const legend = document.getElementById('legend');
+  if (legend) {
+    legend.style.display = (legend.style.display === 'none') ? 'block' : 'none';
+  }
+};
 
 
 // ========= 5. 添加东京标记 =========
@@ -276,4 +340,28 @@ window.resetDayMode = function() {
 
   isNightMode = false;
   console.log('已恢复白天模式');
+};
+
+window.toggleTokyoBoundary = function () {
+  if (!tokyoBoundaryLayer) {
+    loadTokyoBoundary();
+  } else {
+    tokyoBoundaryLayer.show = !tokyoBoundaryLayer.show;
+    console.log('东京边界图层已' + (tokyoBoundaryLayer.show ? '显示' : '隐藏'));
+  }
+};
+
+window.toggleSubway = function () {
+  if (!subwayLayer) {
+    loadSubwayLayer();
+  } else {
+    subwayLayer.show = !subwayLayer.show;
+    console.log('地铁线路图层已' + (subwayLayer.show ? '显示' : '隐藏'));
+  }
+};
+window.toggleSubwayLegend = function () {
+  const legend = document.getElementById('subwayLegend');
+  if (legend) {
+    legend.style.display = (legend.style.display === 'none') ? 'block' : 'none';
+  }
 };
