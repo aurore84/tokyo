@@ -35,7 +35,7 @@
 克隆仓库：
 
 bash
-git clone https://github.com/你的用户名/仓库名.git
+git clone https://github.com/aurore84/tokyo-sandbox.git
 cd 仓库名
 安装 Cesium：
 
@@ -111,5 +111,4 @@ OpenStreetMap 贡献者的基础地图数据
 
 东京都政府提供的开放数据源
 
-注：请将占位文本（如预览图片路径和GitHub网址）替换为您的实际项目信息。
 
